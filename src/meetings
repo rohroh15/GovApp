@@ -1,0 +1,59 @@
+import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { Link } from "react-router-dom";
+
+export default function Meetings() {
+  const [meetings, setMeetings] = useState([]);
+  const [meetingTitle, setMeetingTitle] = useState("");
+
+  useEffect(() => {
+    const savedMeetings = JSON.parse(localStorage.getItem("meetings")) || [];
+    setMeetings(savedMeetings);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("meetings", JSON.stringify(meetings));
+  }, [meetings]);
+
+  const addMeeting = () => {
+    if (meetingTitle.trim()) {
+      const newMeeting = { id: uuidv4(), title: meetingTitle };
+      setMeetings([...meetings, newMeeting]);
+      setMeetingTitle("");
+    }
+  };
+
+  const deleteMeeting = (id) => {
+    const updatedMeetings = meetings.filter((meeting) => meeting.id !== id);
+    setMeetings(updatedMeetings);
+  };
+
+  return (
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <h1 style={{ color: "#007BFF" }}>Manage Meetings</h1>
+
+      <input
+        value={meetingTitle}
+        onChange={(e) => setMeetingTitle(e.target.value)}
+        placeholder="Enter Meeting Title"
+        style={{ padding: "10px", fontSize: "16px", marginRight: "10px" }}
+      />
+      <button onClick={addMeeting} style={{ padding: "10px 15px", fontSize: "16px", backgroundColor: "#007BFF", color: "white", border: "none", borderRadius: "5px", cursor: "pointer" }}>
+        Add Meeting
+      </button>
+
+      {meetings.length > 0 && (
+        <ul style={{ listStyleType: "none", padding: 0, marginTop: "20px" }}>
+          {meetings.map((meeting) => (
+            <li key={meeting.id} style={{ padding: "10px", backgroundColor: "#f8f9fa", borderRadius: "5px", marginBottom: "5px", display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "300px", margin: "0 auto" }}>
+              <Link to={`/agenda/${meeting.id}`} style={{ textDecoration: "none", color: "#333" }}>{meeting.title}</Link>
+              <button onClick={() => deleteMeeting(meeting.id)} style={{ backgroundColor: "#DC3545", color: "white", border: "none", padding: "5px 10px", borderRadius: "5px", cursor: "pointer" }}>
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
